@@ -13,22 +13,23 @@ class Component:
         s = StringVar()
         s.set(value)
         self.vardict[key] = s
-        self.resetInfotext()
-    def resetInfotext(self):
+        self.resetInfotext(None)
+    def resetInfotext(self,e):
         self.infotext = ''
         for key,value in self.vardict.items():
             self.infotext = self.infotext + key + ':' + value.get() + self.delim
         if self.textframe:
             self.canvas.delete(self.textframe)
         self.textframe = self.canvas.create_text(self.loc[0],self.loc[1],text=self.infotext)
-    def modify(self):
-        root=Tk()
+    def modify(self,tk):
+        f = Frame(tk,height=500)
         for k,v in self.vardict.items():
-            Entry(root,text=v.get()).pack()
-        root.mainloop()
-            
-        
-        
+            Entry(f,textvariable=v).pack()
+        b = Button(f,text='complete',command=f.place_forget)
+        b.bind("<Button-1>",self.resetInfotext)
+        b.pack()
+        f.place(x=0,y=0)
+        self.resetInfotext(None)
 
 class creatorGUI:
     def __init__(self):
@@ -122,7 +123,7 @@ class creatorGUI:
             print('click')
             if down[0]=='item':
                 if len(self.item[down[1]])==3:
-                    self.item[down[1]][2].modify()
+                    self.item[down[1]][2].modify(self.root)
 
         # component -> item
         if down[0]=='component' and up[0]=='item':
@@ -134,6 +135,7 @@ class creatorGUI:
                 cmp.put('key1','value1')
                 cmp.put('kkk','vvv')
                 self.item[i].append(cmp)
+                self.canvas.itemconfig(self.item[i][1],fill='pink')
             
         print(down,'->',up)
         
@@ -143,8 +145,10 @@ class creatorGUI:
     def b2(self,e):
         i = self.findItem(e.x,e.y)
         if i>=0:
+            if len(self.item[i])==3:
+                self.canvas.delete(self.item[i][2].textframe)
             self.canvas.delete(self.item[i][1])
-            del self.item[i]
+            del self.item[i]  
     def b3down(self,e):
         self.rightdown = self.findCell(e.x,e.y)
     def b3up(self,e):
