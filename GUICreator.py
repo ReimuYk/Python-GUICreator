@@ -9,13 +9,14 @@ class Component:
         self.infotext = ''
         self.textframe = None
         self.delim = '\n'
+        self.releaseStrings = []
     def put(self,key,value):
         s = StringVar()
         s.set(value)
         self.vardict[key] = s
         self.resetInfotext(None)
     def resetInfotext(self,e):
-        self.infotext = ''
+        self.infotext = 'type:'+self.type+'\n'
         for key,value in self.vardict.items():
             self.infotext = self.infotext + key + ':' + value.get() + self.delim
         if self.textframe:
@@ -30,6 +31,33 @@ class Component:
         b.pack()
         f.place(x=0,y=0)
         self.resetInfotext(None)
+
+class LabelComp(Component):
+    def __init__(self,canvas,location):
+        Component.__init__(self,canvas,'Label',location)
+        self.put('labelname','l')
+        self.put('textvariable','t')
+        self.put('text','zheshilabel')
+    def releaseList(self):
+        res = []
+        res.append('%s=StringVar()'%self.vardict['textvariable'].get())
+        res.append('%s.set(\'%s\')'%(self.vardict['textvariable'].get(),self.vardict['text'].get()))
+        res.append('%s=Label(self.root,textvariable=%s)'%(self.vardict['labelname'].get(),self.vardict['textvariable'].get()))
+        return res
+
+class EntryComp(Component):
+    def __init__(self,canvas,location):
+        Component.__init__(self,canvas,'Entry',location)
+        self.put('entryname','e')
+        self.put('textvariable','t')
+        self.put('text','zheshientry')
+    def releaseList(self):
+        res = []
+        res.append('%s=StringVar()'%self.vardict['textvariable'].get())
+        res.append('%s.set(\'%s\')'%(self.vardict['textvariable'].get(),self.vardict['text'].get()))
+        res.append('%s=Label(self.root,textvariable=%s)'%(self.vardict['entryname'].get(),self.vardict['textvariable'].get()))
+        return res
+        
 
 class creatorGUI:
     def __init__(self):
@@ -84,8 +112,16 @@ class creatorGUI:
         c.create_rectangle(pc[0],pc[1],pc[2],pc[3],fill='gray')
         c.create_text(int((pc[0]+pc[2])/2),int((pc[1]+pc[3])/2),text='Picture')
         self.component.append([pc,'picture'])
+
+        #release button
+        rbc = Button(self.root,width=10,height=3,text='release',command=self.release)
         
         self.canvas.pack()
+        rbc.place(x=w-200,y=h-500)
+    def release(self):
+        for item in self.item:
+            if len(item)==3:
+                print(item[2].releaseList())
     def b1down(self,e):
         c = self.findComponent(e.x,e.y)
         if c>=0:
@@ -126,14 +162,18 @@ class creatorGUI:
                     self.item[down[1]][2].modify(self.root)
 
         # component -> item
+        com_type = ['label','entry','button','picture']
         if down[0]=='component' and up[0]=='item':
             i = up[1]
             if len(self.item[i])==3:
                 print('component existed')
             else:
-                cmp = Component(self.canvas,str(down[1]),self.item[up[1]][0])
-                cmp.put('key1','value1')
-                cmp.put('kkk','vvv')
+                if down[1]==0:
+                    cmp = LabelComp(self.canvas,self.item[up[1]][0])
+                else:
+                    cmp = Component(self.canvas,str(com_type[down[1]]),self.item[up[1]][0])
+                    cmp.put('text','zheshiyiduanwenzi')
+                    cmp.put('fill','red')
                 self.item[i].append(cmp)
                 self.canvas.itemconfig(self.item[i][1],fill='pink')
             
