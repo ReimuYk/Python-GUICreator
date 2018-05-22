@@ -1,5 +1,17 @@
 from tkinter import *
 
+class Releaser:
+    def __init__(self,items):
+        self.level = 0
+        self.output = 'demo.py'
+        self.fd = open(self.output,'w')
+    def write(self,line):
+        self.fd.write(self.level*'\t')
+        self.fd.write(line)
+        self.fd.write('\r\n')
+    def close(self):
+        self.fd.close()
+
 class Component:
     def __init__(self,canvas,t,location):
         self.type = t
@@ -31,31 +43,34 @@ class Component:
         b.pack()
         f.place(x=0,y=0)
         self.resetInfotext(None)
+    def releaseLocation(self,x,y):
+        res = '%s.place(x=%s,y=%s)'%(self.vardict['name'],x,y)
+        return res
 
 class LabelComp(Component):
     def __init__(self,canvas,location):
         Component.__init__(self,canvas,'Label',location)
-        self.put('labelname','l')
+        self.put('name','l')
         self.put('textvariable','t')
         self.put('text','zheshilabel')
     def releaseList(self):
         res = []
         res.append('%s=StringVar()'%self.vardict['textvariable'].get())
         res.append('%s.set(\'%s\')'%(self.vardict['textvariable'].get(),self.vardict['text'].get()))
-        res.append('%s=Label(self.root,textvariable=%s)'%(self.vardict['labelname'].get(),self.vardict['textvariable'].get()))
+        res.append('%s=Label(self.root,textvariable=%s)'%(self.vardict['name'].get(),self.vardict['textvariable'].get()))
         return res
 
 class EntryComp(Component):
     def __init__(self,canvas,location):
         Component.__init__(self,canvas,'Entry',location)
-        self.put('entryname','e')
+        self.put('name','e')
         self.put('textvariable','t')
         self.put('text','zheshientry')
     def releaseList(self):
         res = []
         res.append('%s=StringVar()'%self.vardict['textvariable'].get())
         res.append('%s.set(\'%s\')'%(self.vardict['textvariable'].get(),self.vardict['text'].get()))
-        res.append('%s=Label(self.root,textvariable=%s)'%(self.vardict['entryname'].get(),self.vardict['textvariable'].get()))
+        res.append('%s=Label(self.root,textvariable=%s)'%(self.vardict['name'].get(),self.vardict['textvariable'].get()))
         return res
         
 
@@ -216,4 +231,6 @@ class creatorGUI:
                 return item
         return None
 
+r = Releaser([])
+r.write('this is a demo')
 root = creatorGUI()
