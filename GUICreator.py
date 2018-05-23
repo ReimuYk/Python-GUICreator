@@ -8,9 +8,17 @@ class Releaser:
     def write(self,line):
         self.fd.write(self.level*'\t')
         self.fd.write(line)
-        self.fd.write('\r\n')
+        self.fd.write('\n')
     def close(self):
         self.fd.close()
+    def codeblock(self,code):
+        for item in code:
+            if type(item)==type(''):
+                self.write(item)
+            else:
+                self.level += 1
+                self.codeblock(item)
+                self.level -= 1
 
 class Component:
     def __init__(self,canvas,t,location):
@@ -233,4 +241,6 @@ class creatorGUI:
 
 r = Releaser([])
 r.write('this is a demo')
+r.codeblock(['line1',['line2','line3']])
+r.close()
 root = creatorGUI()
