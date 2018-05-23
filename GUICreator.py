@@ -2,11 +2,15 @@ from tkinter import *
 
 class Releaser:
     def __init__(self,items):
+        print(items)
         self.level = 0
+        self.body=[]
         self.output = 'demo.py'
         self.fd = open(self.output,'w')
+        self.codelogic(items)
+        self.codeblock(self.body)
     def write(self,line):
-        self.fd.write(self.level*'\t')
+        self.fd.write(self.level*4*' ')
         self.fd.write(line)
         self.fd.write('\n')
     def close(self):
@@ -19,6 +23,31 @@ class Releaser:
                 self.level += 1
                 self.codeblock(item)
                 self.level -= 1
+    def codelogic(self,items):
+        #### import
+        add = self.body.append
+        add("from tkinter import *")
+        add("from PIL import Image")
+        add("")
+        #### class GUI
+        gui = []
+        add("class GUI:")
+        g = gui.append
+        ## def__init__
+        g("def __init__(self):")
+        init = []
+        t = init.append
+        t("self.root = Tk()")
+        # items
+        for item in items:
+            init += item[2].releaseList(item[0])
+        t("self.root.mainloop()")
+        g(init)# end init block
+        add(gui)# end GUI block
+        add("g = GUI()")
+        
+        
+        
 
 class Component:
     def __init__(self,canvas,t,location):
@@ -51,9 +80,6 @@ class Component:
         b.pack()
         f.place(x=0,y=0)
         self.resetInfotext(None)
-    def releaseLocation(self,x,y):
-        res = '%s.place(x=%s,y=%s)'%(self.vardict['name'],x,y)
-        return res
 
 class LabelComp(Component):
     def __init__(self,canvas,location):
@@ -61,11 +87,14 @@ class LabelComp(Component):
         self.put('name','l')
         self.put('textvariable','t')
         self.put('text','zheshilabel')
-    def releaseList(self):
+        self.put('bg','white')
+    def releaseList(self,location):
         res = []
         res.append('%s=StringVar()'%self.vardict['textvariable'].get())
         res.append('%s.set(\'%s\')'%(self.vardict['textvariable'].get(),self.vardict['text'].get()))
-        res.append('%s=Label(self.root,textvariable=%s)'%(self.vardict['name'].get(),self.vardict['textvariable'].get()))
+        l = location
+        res.append('%s=Label(self.root,textvariable=%s,width=%s,height=%s,bg=\'%s\')'%(self.vardict['name'].get(),self.vardict['textvariable'].get(),round((l[2]-l[0])/10),round((l[3]-l[1])/20),self.vardict['bg'].get()))
+        res.append('%s.place(x=%s,y=%s)'%(self.vardict['name'].get(),l[0],l[1]))
         return res
 
 class EntryComp(Component):
@@ -142,9 +171,11 @@ class creatorGUI:
         self.canvas.pack()
         rbc.place(x=w-200,y=h-500)
     def release(self):
-        for item in self.item:
-            if len(item)==3:
-                print(item[2].releaseList())
+        r = Releaser(self.item)
+        r.close()
+##        for item in self.item:
+##            if len(item)==3:
+##                print(item[2].releaseList())
     def b1down(self,e):
         c = self.findComponent(e.x,e.y)
         if c>=0:
@@ -239,8 +270,5 @@ class creatorGUI:
                 return item
         return None
 
-r = Releaser([])
-r.write('this is a demo')
-r.codeblock(['line1',['line2','line3']])
-r.close()
+
 root = creatorGUI()
